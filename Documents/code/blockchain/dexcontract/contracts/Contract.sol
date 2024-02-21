@@ -68,7 +68,7 @@ contract DEX is ERC20Base {
         }
     }
 
-    function swapToEth() public payable{
+    function swapEthToToken() public payable{
         uint256 _reservedToken = getTokensInContract();
         uint256 _tokensBought = getAmountOfTokens(
             msg.value,
