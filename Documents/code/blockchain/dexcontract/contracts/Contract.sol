@@ -40,6 +40,21 @@ contract DEX is ERC20Base {
         }
         return _liquidity;
     }
+    
+    function removeLiquidity( uint256 _amount ) public returns(uint256, uint256){
+        require(_amount > 0, "Amount should be greater 0");
+        uint256 _reservedEth = address(this).balance;
+        uint256 _totalSupply = totalSupply();
 
+        uint256 _ethAmount = (_reservedEth * _amount) / totalSupply();
+        uint256 _tokenAmount = (getTokensInContract() * _amount) / _totalSupply;
+
+        _burn(msg.sender, _amount);
+        payable(msg.sender).transfer(_ethAmount);
+        ERC20Base(token).transfer(msg.sender, _tokenAmount);
+        return (_ethAmount, _tokenAmount);
+    }
+
+    
 
 }
