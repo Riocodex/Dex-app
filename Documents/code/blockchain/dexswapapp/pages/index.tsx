@@ -1,102 +1,121 @@
-import { ConnectWallet } from "@thirdweb-dev/react";
+import { ConnectWallet, toEther, toWei, useAddress, useBalance, useContract, useContractRead, useContractWrite, useSDK, useTokenBalance } from "@thirdweb-dev/react";
 import styles from "../styles/Home.module.css";
 import Image from "next/image";
 import { NextPage } from "next";
+import { useToken } from "wagmi";
+import { useEffect, useState } from "react";
 
 const Home: NextPage = () => {
+  const TOKEN_CONTRACT = "0xfcfa4910A76398ea2c8c46c827f2321e7D10f161";
+  const DEX_CONTRACT = "0x7437721b006ff1C089672390EF997aa549709917";
+
+  const sdk = useSDK();
+
+  const address = useAddress();
+
+  const { contract: tokenContract } = useContract(TOKEN_CONTRACT);
+  const { contract: dexContract } = useContract(DEX_CONTRACT);
+
+  const { data: symbol } = useContractRead(tokenContract, "symbol");
+  const { data: tokenBalance } = useTokenBalance(tokenContract, address);
+
+  const { data: nativeBalance } = useBalance();
+  const { data: contractTokenBalance } = useTokenBalance(tokenContract, DEX_CONTRACT);
+
+  const [ contractBalance, setContractBalance ] = useState<String>("0");
+  const [ nativeValue, setNativeValue ] = useState<String>("0");
+  const [ tokenValue, setTokenValue ] = useState<String>("0");
+  const [ currentForm, setCurrentForm ] = useState<String>("native")
+  const [ isLoading, setIsLoading ] = useState<Boolean>(false);
+
+  const { mutateAsync: swapNativeToken } = useContractWrite(
+    dexContract,
+    "swapEthToToken"
+  );
+
+  const { mutateAsync: swapTokenToNative } = useContractWrite(
+    dexContract,
+    "swapEthToToken"
+  );
+  const { mutateAsync: approveTokenSpending } = useContractWrite(
+    tokenContract,
+    "approve"
+  )
+
+  const { data: amountToGet } = useContractRead(
+    dexContract,
+    "getAmountOfTokens",
+    currentForm === "native"
+    ?[
+      toWei(nativeValue as string || "0"),
+      toWei(contractBalance as string || "0"),
+      contractTokenBalance?.value,
+    ]:[
+      toWei(tokenValue as string || "0"),
+      contractTokenBalance?.value,
+      toWei(contractBalance as string || "0"),
+    ]
+  );
+
+  const fetchContractBalance = async()=>{
+    try{
+      const balance = await sdk?.getBalance(DEX_CONTRACT);
+      setContractBalance(balance?.displayValue || "0");
+    }catch(error){
+      console.error(error);
+    }
+  }
+
+  const executeSwap = async()=>{
+     setIsLoading(true);
+     try{
+        if(currentForm  == "native"){
+          await swapNativeToken({
+            overrides:{
+              value: toWei(nativeValue as string || "0")
+            }
+          });
+          alert("Swap executed successfully")
+        }else{
+          await approveTokenSpending({
+            args:[
+              DEX_CONTRACT,
+              toWei(tokenValue as string || "0")
+            ]
+          });
+          await swapTokenToNative({
+            args:[
+              toWei(tokenValue as string || "0")
+            ]
+          });
+          alert("Swap executed successfully")
+        }
+     }catch(error){
+      console.error(error);
+      alert("An error occured while trying to execute the swap")
+     }finally{
+      setIsLoading(false);
+     }
+  };
+
+  useEffect(()=>{
+    fetchContractBalance();
+    setInterval(fetchContractBalance, 10000)
+  },[])
+
+  useEffect(()=>{
+    if(!amountToGet) return;
+    if(currentForm === "native"){
+      setTokenValue(toEther(amountToGet))
+    }else{
+      setNativeValue(toEther(amountToGet))
+    }
+  },[amountToGet])
+
+
   return (
     <main className={styles.main}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>
-            Welcome to{" "}
-            <span className={styles.gradientText0}>
-              <a
-                href="https://thirdweb.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                thirdweb.
-              </a>
-            </span>
-          </h1>
-
-          <p className={styles.description}>
-            Get started by configuring your desired network in{" "}
-            <code className={styles.code}>src/index.js</code>, then modify the{" "}
-            <code className={styles.code}>src/App.js</code> file!
-          </p>
-
-          <div className={styles.connect}>
-            <ConnectWallet />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://portal.thirdweb.com/"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/portal-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText1}>Portal ➜</h2>
-              <p>
-                Guides, references, and resources that will help you build with
-                thirdweb.
-              </p>
-            </div>
-          </a>
-
-          <a
-            href="https://thirdweb.com/dashboard"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/dashboard-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText2}>Dashboard ➜</h2>
-              <p>
-                Deploy, configure, and manage your smart contracts from the
-                dashboard.
-              </p>
-            </div>
-          </a>
-
-          <a
-            href="https://thirdweb.com/templates"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/templates-preview.png"
-              alt="Placeholder preview of templates"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText3}>Templates ➜</h2>
-              <p>
-                Discover and clone template projects showcasing thirdweb
-                features.
-              </p>
-            </div>
-          </a>
-        </div>
-      </div>
+      
     </main>
   );
 };
