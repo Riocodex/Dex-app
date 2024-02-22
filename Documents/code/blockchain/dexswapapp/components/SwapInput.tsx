@@ -27,7 +27,8 @@ export default function SwapInput({
         return value;
     }
     return(
-        <div className={styles.swapInputContainer}>
+      <div className={styles.ogContainer}>
+          <div className={styles.swapInputContainer}>
             <input 
             type="number"
             placeholder="0.0"
@@ -37,22 +38,23 @@ export default function SwapInput({
             className={styles.swapInput}/>
 
             <div style={{position: "relative", top: "10px", right:"10px"}}>
-                <p style={{
+                <p className={styles.coolText} style={{
                     fontSize:"12px",
                     marginBottom:"-5px",
                 }}>{tokenSymbol}</p>
-                <p style={{
+                <p  className={styles.coolText} style={{
                     fontSize:"10px"
                 }}>Balance: {truncate(tokenBalance as string)}</p>
                 {current === type && (
                     <button
                         onClick={()=>setValue(max as string || "0")}
-                        className={styles.maxButton}
-                    >
-                        Max
+                        className={styles.smallButton}
+                    >MAX
+                        
                     </button>
                 )}
             </div>
         </div>
+      </div>
     )
 }

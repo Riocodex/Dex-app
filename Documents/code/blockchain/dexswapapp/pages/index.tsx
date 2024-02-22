@@ -161,11 +161,12 @@ const Home: NextPage = () => {
               />
           </div>
           {address?(
-            <div style={{textAlign:"center"}}>
-              <button
+            <div 
+            style={{textAlign:"center"}}>
+              <button 
                 onClick={executeSwap}
                 disabled={isLoading as boolean}
-                className = {styles.swapButton}
+                className = {styles.button}
               >{
                 isLoading
                   ? "Loading..."
