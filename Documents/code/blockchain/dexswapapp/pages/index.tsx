@@ -143,12 +143,40 @@ const Home: NextPage = () => {
               tokenSymbol="MATIC"
               tokenBalance={nativeBalance?.displayValue}
              />
+             <button
+              onClick={()=>{
+                currentForm === "native"
+                ? setCurrentForm("token")
+                : setCurrentForm("native")
+              }}
+             >↓</button>
               <SwapInput
-                current = {}
+                current = {currentForm as string}
+                type="token"
+                max={tokenBalance?.displayValue}
+                value={tokenValue as string}
+                setValue = {setTokenValue}
+                tokenSymbol={symbol as string}
+                tokenBalance={tokenBalance?.displayValue}
               />
-             
-
           </div>
+          {address?(
+            <div style={{textAlign:"center"}}>
+              <button
+                onClick={executeSwap}
+                disabled={isLoading as boolean}
+                className = {styles.swapButton}
+              >{
+                isLoading
+                  ? "Loading..."
+                  : "Swap"
+              }
+
+              </button>
+            </div>
+          ):(
+            <p>Connect a wallet to exchange</p>
+          )}
 
         </div>
       </div>

@@ -36,7 +36,7 @@ export default function SwapInput({
             disabled={current != type} 
             className={styles.swapInput}/>
 
-            <div style={{position: "absolute", top: "10px", right:"10px"}}>
+            <div style={{position: "relative", top: "10px", right:"10px"}}>
                 <p style={{
                     fontSize:"12px",
                     marginBottom:"-5px",

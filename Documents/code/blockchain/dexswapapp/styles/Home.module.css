@@ -6,6 +6,9 @@
   padding: 6rem;
   min-height: 100vh;
 }
+.red{
+  background-color: red;
+}
 
 .description {
   display: inherit;
