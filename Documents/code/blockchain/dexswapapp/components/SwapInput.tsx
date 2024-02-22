@@ -33,7 +33,26 @@ export default function SwapInput({
             placeholder="0.0"
             value={value}
             onChange={(e)=>setValue(e.target.value)}
-            disabled={current != type} />
+            disabled={current != type} 
+            className={styles.swapInput}/>
+
+            <div style={{position: "absolute", top: "10px", right:"10px"}}>
+                <p style={{
+                    fontSize:"12px",
+                    marginBottom:"-5px",
+                }}>{tokenSymbol}</p>
+                <p style={{
+                    fontSize:"10px"
+                }}>Balance: {truncate(tokenBalance as string)}</p>
+                {current === type && (
+                    <button
+                        onClick={()=>setValue(max as string || "0")}
+                        className={styles.maxButton}
+                    >
+                        Max
+                    </button>
+                )}
+            </div>
         </div>
     )
 }

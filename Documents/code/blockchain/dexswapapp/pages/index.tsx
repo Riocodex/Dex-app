@@ -4,6 +4,7 @@ import Image from "next/image";
 import { NextPage } from "next";
 import { useToken } from "wagmi";
 import { useEffect, useState } from "react";
+import SwapInput from "../components/SwapInput";
 
 const Home: NextPage = () => {
   const TOKEN_CONTRACT = "0xfcfa4910A76398ea2c8c46c827f2321e7D10f161";
@@ -115,7 +116,42 @@ const Home: NextPage = () => {
 
   return (
     <main className={styles.main}>
-      
+      <div className={styles.container}>
+        <div style={{
+          backgroundColor: '#111',
+          padding: "2rem",
+          borderRadius:"10px",
+          minWidth:"500px"
+        }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: currentForm === "native" ? "column": "column-reverse",
+              alignItems: "center",
+              justifyContent: "center",
+              margin:"10px",
+            }}
+          >
+
+             <SwapInput
+              current={currentForm as string}
+              type="native"
+              max={nativeBalance?.displayValue}
+              value={nativeValue as string}
+              setValue={setNativeValue}
+              tokenSymbol="MATIC"
+              tokenBalance={nativeBalance?.displayValue}
+             />
+              <SwapInput
+                current = {}
+              />
+             
+
+          </div>
+
+        </div>
+      </div>
     </main>
   );
 };
